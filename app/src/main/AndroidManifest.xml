@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CollpasingToolBarActivity"
+            android:label="@string/title_activity_collpasing_tool_bar"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.xiaofeng.playground.MainActivity" />
+        </activity>
     </application>
 
 </manifest>
