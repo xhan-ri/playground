@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                                               xmlns:tools="http://schemas.android.com/tools"
+                                               android:layout_width="match_parent"
+                                               android:layout_height="200dp"
+                                               xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/header_text"
+        app:layout_widthPercent="50%"
+        app:layout_heightPercent="90%"
+        android:layout_alignParentLeft="true"
+        android:text="This is header text"
+        android:background="@android:color/white"
+        android:gravity="center"/>
+    <Button
+        app:layout_widthPercent="50%"
+        app:layout_heightPercent="90%"
+        android:layout_toRightOf="@id/header_text"
+        android:text="Header Button"/>
+</android.support.percent.PercentRelativeLayout>
