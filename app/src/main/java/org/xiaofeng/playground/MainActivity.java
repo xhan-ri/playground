@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
 			}
 		});
+		startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
 	}
 
 	@Override
