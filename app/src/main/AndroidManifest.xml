@@ -24,6 +24,22 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="org.xiaofeng.playground.MainActivity" />
         </activity>
+        <activity
+            android:name=".FlowingLayoutActivity"
+            android:label="@string/title_activity_flowing_layout"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.xiaofeng.playground.MainActivity" />
+        </activity>
+        <activity
+            android:name=".FlowingLayoutActivity2"
+            android:label="@string/title_activity_flowing_layout2"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.xiaofeng.playground.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

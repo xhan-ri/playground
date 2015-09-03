@@ -19,7 +19,18 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
 			}
 		});
-		startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
+		findViewById(R.id.flowing_layout_button).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, FlowingLayoutActivity.class));
+			}
+		});
+		findViewById(R.id.flowing_layout_button2).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, FlowingLayoutActivity2.class));
+			}
+		});
 	}
 
 	@Override
