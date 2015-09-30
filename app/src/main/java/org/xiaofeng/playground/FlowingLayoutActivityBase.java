@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class FlowingLayoutActivityBase extends AppCompatActivity {
 	protected static final String STRING_BASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-	protected static final int TAG_COUNT = 100;
+	protected static final int TAG_COUNT = 20;
 
 	protected List<String> generateTags() {
 		Random random = new Random();

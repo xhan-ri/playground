@@ -31,6 +31,13 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, FlowingLayoutActivity2.class));
 			}
 		});
+
+		findViewById(R.id.layout_animation_button).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, LayoutAnimationActivity.class));
+			}
+		});
 	}
 
 	@Override

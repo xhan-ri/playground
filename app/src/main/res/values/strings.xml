@@ -10,4 +10,5 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_flowing_layout">FlowingLayoutActivity</string>
     <string name="title_activity_flowing_layout2">FlowingLayoutActivity2</string>
+    <string name="title_activity_layout_animation">LayoutAnimationActivity</string>
 </resources>
