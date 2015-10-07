@@ -15,4 +15,11 @@
         app:layout_widthPercent="60%"
         app:layout_heightPercent="30%"/>
 
+    <Button
+        android:id="@+id/drawer_button"
+        android:text="Drawer activity"
+        app:layout_widthPercent="40%"
+        app:layout_heightPercent="30%"
+        android:layout_below="@id/collapsing_toolbar_button"/>
+
 </android.support.percent.PercentRelativeLayout>
