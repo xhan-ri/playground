@@ -11,4 +11,6 @@
     <string name="title_activity_flowing_layout">FlowingLayoutActivity</string>
     <string name="title_activity_flowing_layout2">FlowingLayoutActivity2</string>
     <string name="title_activity_layout_animation">LayoutAnimationActivity</string>
+    <string name="navigation_drawer_open">Open</string>
+    <string name="navigation_drawer_close">Close</string>
 </resources>
