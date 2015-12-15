@@ -19,14 +19,25 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
 			}
 		});
-		findViewById(R.id.drawer_button).setOnClickListener(new View.OnClickListener() {
+		findViewById(R.id.flowing_layout_button).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(new Intent(MainActivity.this, DrawerActivity.class));
+				startActivity(new Intent(MainActivity.this, FlowingLayoutActivity.class));
 			}
 		});
-//		startActivity(new Intent(MainActivity.this, DrawerActivity.class));
-		startActivity(new Intent(MainActivity.this, CollpasingToolBarActivity.class));
+		findViewById(R.id.flowing_layout_button2).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, FlowingLayoutActivity2.class));
+			}
+		});
+
+		findViewById(R.id.layout_animation_button).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, LayoutAnimationActivity.class));
+			}
+		});
 	}
 
 	@Override

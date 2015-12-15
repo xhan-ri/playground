@@ -1,0 +1,13 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+<com.wefika.flowlayout.FlowLayout
+
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context="org.xiaofeng.playground.FlowingLayoutActivity2"
+    android:id="@+id/flow_layout"
+    android:gravity="center|top"/>
+</ScrollView>
