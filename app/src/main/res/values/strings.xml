@@ -6,11 +6,12 @@
     <string name="collapsing_toolbar">Collapsing Toolbar</string>
     <string name="title_activity_collpasing_tool_bar">CollpasingToolBarActivity</string>
 
-<!-- TODO: Remove or change this placeholder text -->
+    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_flowing_layout">FlowingLayoutActivity</string>
     <string name="title_activity_flowing_layout2">FlowingLayoutActivity2</string>
     <string name="title_activity_layout_animation">LayoutAnimationActivity</string>
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
+    <string name="title_activity_flow_layout">Flow layout</string>
 </resources>

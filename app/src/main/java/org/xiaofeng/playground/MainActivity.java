@@ -38,6 +38,13 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, LayoutAnimationActivity.class));
 			}
 		});
+
+		findViewById(R.id.flow_layout_3_button).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, FlowLayoutActivity.class));
+			}
+		});
 	}
 
 	@Override
