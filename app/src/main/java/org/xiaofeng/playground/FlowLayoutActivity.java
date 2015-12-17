@@ -9,6 +9,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -57,8 +59,11 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			holder.itemText.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					String itemText = items.get(position);
-					Toast.makeText(FlowLayoutActivity.this, itemText, Toast.LENGTH_SHORT).show();
+					int childPosition = recyclerView.getChildAdapterPosition(v);
+					items.remove(childPosition);
+//					String itemText = items.get(childPosition);
+//					Toast.makeText(FlowLayoutActivity.this, itemText + " (position = " + childPosition + ")", Toast.LENGTH_SHORT).show();
+					notifyItemRemoved(childPosition);
 				}
 			});
 		}
@@ -142,4 +147,20 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		return sb.toString();
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.menu_flow_layoutmanager, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		int id = item.getItemId();
+		if (id == R.id.scroll_to_middle) {
+			recyclerView.scrollToPosition(TEST_ITEM_SIZE / 2);
+		} else if (id == R.id.smooth_scroll_to_middle) {
+			recyclerView.smoothScrollToPosition(TEST_ITEM_SIZE / 2);
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }

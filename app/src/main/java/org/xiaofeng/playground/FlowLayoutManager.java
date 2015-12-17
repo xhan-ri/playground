@@ -1,6 +1,8 @@
 package org.xiaofeng.playground;
 
+import android.graphics.PointF;
 import android.graphics.Rect;
+import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +16,8 @@ import java.util.List;
 public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	private static final String LOG_TAG = "FlowLayoutManager";
 	RecyclerView recyclerView;
+	int firstChildAdapterPosition = 0;
+	RecyclerView.Recycler recyclerRef;
 	@Override
 	public RecyclerView.LayoutParams generateDefaultLayoutParams() {
 		return new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.WRAP_CONTENT);
@@ -21,12 +25,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+		recyclerRef = recycler;
 		removeAndRecycleAllViews(recycler);
 		int left = recyclerView.getPaddingLeft(), top = recyclerView.getPaddingTop(), right = 0, bottom = 0;
 		int itemCount = getItemCount();
 		int containerWidth = recyclerView.getMeasuredWidth();
 		int currentMaxHeight = 0;
-		for (int i = 0; i < itemCount; i ++) {
+		for (int i = firstChildAdapterPosition; i < itemCount; i ++) {
 			View child = recycler.getViewForPosition(i);
 			measureChildWithMargins(child, 0, 0);
 			int itemWidth = getDecoratedMeasuredWidth(child), itemHeight = getDecoratedMeasuredHeight(child);
@@ -102,6 +107,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		while (!lineVisible(0)) {
 			recycleLine(0, recycler);
 		}
+		firstChildAdapterPosition = getChildAdapterPosition(0);
 		return actualDy;
 	}
 
@@ -132,6 +138,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		while (!lineVisible(getChildCount() - 1)) {
 			recycleLine(getChildCount() - 1, recycler);
 		}
+		firstChildAdapterPosition = getChildAdapterPosition(0);
 		return actualDy;
 	}
 
@@ -148,6 +155,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			// add view to make sure not be recycled.
 			addView(newChild, newChildList.size());
 			if (right + getDecoratedMeasuredWidth(newChild) > rightVisibleEdge()) {
+				// end of one line, but not reach the top line yet. recycle the line and
+				// move on to next.
 				for (View viewToRecycle : newChildList) {
 					removeAndRecycleView(viewToRecycle, recycler);
 				}
@@ -205,6 +214,24 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	@Override
 	public boolean supportsPredictiveItemAnimations() {
 		return false;
+	}
+
+	@Override
+	public void scrollToPosition(int position) {
+		firstChildAdapterPosition = position;
+		requestLayout();
+	}
+
+	@Override
+	public void smoothScrollToPosition(final RecyclerView recyclerView, final RecyclerView.State state, int position) {
+		RecyclerView.SmoothScroller smoothScroller = new LinearSmoothScroller(recyclerView.getContext()) {
+			@Override
+			public PointF computeScrollVectorForPosition(int targetPosition) {
+				return new PointF(0, getOffsetOfItemToFirstChild(targetPosition, recyclerRef));
+			}
+		};
+		smoothScroller.setTargetPosition(position);
+		startSmoothScroll(smoothScroller);
 	}
 
 	private int leftVisibleEdge() {
@@ -301,6 +328,66 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		List<View> viewList = getAllViewsInLine(index);
 		for (View viewToRecycle : viewList) {
 			removeAndRecycleView(viewToRecycle, recycler);
+		}
+	}
+
+	private int getOffsetOfItemToFirstChild(int adapterPosition, RecyclerView.Recycler recycler) {
+		int firstChildAdapterPosition = getChildAdapterPosition(0);
+		if (firstChildAdapterPosition == adapterPosition) {
+			// first child is target, just make sure it is fully visible.
+			return topVisibleEdge() - getDecoratedTop(getChildAt(0));
+		}
+
+		if (adapterPosition > firstChildAdapterPosition) {
+			int lastChildAdapterPosition = getChildAdapterPosition(getChildCount() - 1);
+			// target child in screen, no need to calc.
+			if (lastChildAdapterPosition >= adapterPosition) {
+				int targetChildIndex = getChildCount() - 1 - (lastChildAdapterPosition - adapterPosition);
+				return getDecoratedTop(getChildAt(targetChildIndex)) - topVisibleEdge();
+			} else {
+				// target child is below screen edge
+				int offset = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1))) - topVisibleEdge();
+				int targetAdapterPosition = lastChildAdapterPosition + 1;
+				int left = leftVisibleEdge();
+				int height = 0;
+				while (targetAdapterPosition != adapterPosition) {
+					View nextChild = recycler.getViewForPosition(targetAdapterPosition);
+					measureChildWithMargins(nextChild, 0, 0);
+					if (left + getDecoratedMeasuredWidth(nextChild) > rightVisibleEdge()) {
+						// should start a new line
+						offset += height;
+						left = leftVisibleEdge() + getDecoratedMeasuredWidth(nextChild);
+						height = getDecoratedMeasuredHeight(nextChild);
+					} else {
+						left += getDecoratedMeasuredWidth(nextChild);
+						height = Math.max(height, getDecoratedMeasuredHeight(nextChild));
+					}
+					recycler.recycleView(nextChild);
+					targetAdapterPosition ++;
+				}
+				return offset;
+			}
+		} else {
+			// target is off screen top, Need to start from beginning in dataset
+			int targetAdapterPosition = 0, left = leftVisibleEdge(), height = 0;
+			int offset = topVisibleEdge() - getDecoratedTop(getChildAt(0));
+			// first find out target item location
+			while (targetAdapterPosition <= firstChildAdapterPosition) {
+				View child = recycler.getViewForPosition(targetAdapterPosition);
+				measureChildWithMargins(child, 0, 0);
+				if (left + getDecoratedMeasuredWidth(child) > rightVisibleEdge()) {
+					left = leftVisibleEdge() + getDecoratedMeasuredWidth(child);
+					height = getDecoratedMeasuredHeight(child);
+					if (targetAdapterPosition >= targetAdapterPosition) {
+						offset += height;
+					}
+				} else {
+					left += getDecoratedMeasuredWidth(child);
+					height = Math.max(height, getDecoratedMeasuredHeight(child));
+				}
+				targetAdapterPosition ++;
+			}
+			return -offset;
 		}
 	}
 }
