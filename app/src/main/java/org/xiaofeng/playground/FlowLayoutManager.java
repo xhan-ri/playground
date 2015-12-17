@@ -22,7 +22,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		removeAndRecycleAllViews(recycler);
-		Log.i(LOG_TAG, "RecyclerView state = " + state);
 		int left = recyclerView.getPaddingLeft(), top = recyclerView.getPaddingTop(), right = 0, bottom = 0;
 		int itemCount = getItemCount();
 		int containerWidth = recyclerView.getMeasuredWidth();
@@ -64,7 +63,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	@Override
 	public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
-//		Log.i(LOG_TAG, "scrollVerticallyBy - dy = " + dy);
 		if (dy == 0) {
 			return 0;
 		}
@@ -246,7 +244,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private int getMaxHeightIndexInLine(int index) {
-		Log.i(LOG_TAG, "getMaxHeightIndexInLine - index = " + index);
 		final View child = getChildAt(index);
 		int maxIndexBefore = index, maxIndexAfter = index, maxHeightBefore = getDecoratedMeasuredHeight(child), maxHeightAfter = getDecoratedMeasuredHeight(child);
 		int currentIndex = index;
