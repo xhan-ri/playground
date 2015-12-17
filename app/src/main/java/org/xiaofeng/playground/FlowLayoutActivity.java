@@ -25,7 +25,7 @@ public class FlowLayoutActivity extends AppCompatActivity {
 	private static final int MIN_LEN = 3;
 	private static final int MAX_LEN = 10;
 	private static final int MAX_LINES = 1;
-	private static final int TEST_ITEM_SIZE = 200;
+	private static final int TEST_ITEM_SIZE = 100;
 	private static final Random random = new Random();
 	private static final String STRING_BASE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private static final int STRING_BASE_LEN = STRING_BASE.length();
@@ -78,13 +78,14 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		setSupportActionBar(toolbar);
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-						.setAction("Action", null).show();
-			}
-		});
+		fab.setVisibility(View.INVISIBLE);
+//		fab.setOnClickListener(new View.OnClickListener() {
+//			@Override
+//			public void onClick(View view) {
+//				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//						.setAction("Action", null).show();
+//			}
+//		});
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
@@ -95,10 +96,10 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			@Override
 			public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
 				super.getItemOffsets(outRect, view, parent, state);
-				outRect.left = 5;
-				outRect.top = 5;
-				outRect.right = 5;
-				outRect.bottom = 5;
+				outRect.left = 10;
+				outRect.top = 10;
+				outRect.right = 10;
+				outRect.bottom = 10;
 			}
 		});
 		recyclerView.setLayoutManager(
@@ -109,12 +110,12 @@ public class FlowLayoutActivity extends AppCompatActivity {
 	private static List<String> generateTestStrings() {
 		ArrayList<String> strings = new ArrayList<>(TEST_ITEM_SIZE);
 		for (int i = 0; i < TEST_ITEM_SIZE; i ++) {
-			strings.add(generateTestString());
+			strings.add(generateTestString(i % STRING_BASE.length()));
 		}
 		return strings;
 	}
 
-	private static String generateTestString() {
+	private static String generateTestString(int index) {
 		StringBuilder sb = new StringBuilder();
 		int lines = random.nextInt(MAX_LINES) + 1;
 		boolean first = true;
@@ -124,19 +125,18 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			} else {
 				sb.append(System.lineSeparator());
 			}
-			sb.append(generateTestStringLine());
+			sb.append(generateTestStringLine(index));
 		}
 		return sb.toString();
 	}
 
-	private static String generateTestStringLine() {
+	private static String generateTestStringLine(int index) {
 		StringBuilder sb = new StringBuilder();
 		int len = 0;
 		while (len <= MIN_LEN) {
 			len = random.nextInt(MAX_LEN) + 1;
 		}
 		while (sb.length() < len) {
-			int index = random.nextInt(STRING_BASE_LEN);
 			sb.append(STRING_BASE.charAt(index));
 		}
 		return sb.toString();

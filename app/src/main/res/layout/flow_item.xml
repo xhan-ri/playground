@@ -3,4 +3,6 @@
           android:id="@+id/flow_item_text"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
+          android:background="@android:color/holo_green_light"
+          android:textSize="30dip"
     android:textColor="@android:color/black"/>
