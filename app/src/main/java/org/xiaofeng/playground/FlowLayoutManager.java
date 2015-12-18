@@ -86,39 +86,34 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private void onRealLayoutChildren(RecyclerView.Recycler recycler) {
 		detachAndScrapAttachedViews(recycler);
-		layoutChildrenImpl(recycler, -1);
+		layoutChildrenImpl(recycler);
 	}
 
-	private void layoutChildrenImpl(RecyclerView.Recycler recycler, int endPosition) {
-		int left = recyclerView.getPaddingLeft(), top = recyclerView.getPaddingTop(), right = 0, bottom = 0;
+	private void layoutChildrenImpl(RecyclerView.Recycler recycler) {
+		int left = leftVisibleEdge(), top = topVisibleEdge();
 		int itemCount = getItemCount();
-		int containerWidth = recyclerView.getMeasuredWidth();
 		int height = 0;
+		boolean newLine;
+		Rect rect = new Rect();
 		for (int i = firstChildAdapterPosition; i < itemCount; i ++) {
 			View child = recycler.getViewForPosition(i);
-			measureChildWithMargins(child, 0, 0);
-			int itemWidth = getDecoratedMeasuredWidth(child), itemHeight = getDecoratedMeasuredHeight(child);
-			if (left + itemWidth >= containerWidth - recyclerView.getPaddingRight()) {
-				left = leftVisibleEdge();
-				top += height;
-				height = itemHeight;
-			}
-			right = left + itemWidth;
-			bottom = top + itemHeight;
-			if (childVisible(left, top, right, bottom) || i <= endPosition) {
-				if (isChildRemoved(child)) {
-					addDisappearingView(child);
-				} else {
-					addView(child);
-				}
-				layoutDecorated(child, left, top, right, bottom);
-			} else {
+			newLine = calcChildLayoutRect(child, left, top, height, rect);
+			if (!childVisible(rect)) {
 				recycler.recycleView(child);
 				return;
+			} else {
+				addView(child);
+				layoutDecorated(child, rect.left, rect.top, rect.right, rect.bottom);
 			}
 
-			height = Math.max(height, itemHeight);
-			left = right;
+			if (newLine) {
+				left = leftVisibleEdge() + rect.width();
+				top = rect.top;
+				height = rect.height();
+			} else {
+				left += rect.width();
+				height = Math.max(height, rect.height());
+			}
 		}
 	}
 
@@ -324,6 +319,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				new Rect(left, top, right, bottom));
 	}
 
+	private boolean childVisible(Rect childRect) {
+		return Rect.intersects(new Rect(leftVisibleEdge(), topVisibleEdge(), rightVisibleEdge(), bottomVisibleEdge()), childRect);
+	}
+
 	private boolean firstOneInTheLine(int index) {
 		if (index == 0) {
 			return true;
@@ -474,5 +473,26 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private boolean isChildRemoved(View child) {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
+	}
+
+	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, Rect rect) {
+		boolean newLine;
+		measureChildWithMargins(child, 0, 0);
+		int childWidth = getDecoratedMeasuredWidth(child);
+		int childHeight = getDecoratedMeasuredHeight(child);
+		if (x + childWidth > rightVisibleEdge()) {
+			newLine = true;
+			rect.left = leftVisibleEdge();
+			rect.top = y + lineHeight;
+			rect.right = rect.left + childWidth;
+			rect.bottom = rect.top + childHeight;
+		} else {
+			newLine = false;
+			rect.left = x;
+			rect.top = y;
+			rect.right = rect.left + childWidth;
+			rect.bottom = rect.top + childHeight;
+		}
+		return newLine;
 	}
 }
