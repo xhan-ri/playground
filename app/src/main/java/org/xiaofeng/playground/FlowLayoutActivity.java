@@ -61,8 +61,6 @@ public class FlowLayoutActivity extends AppCompatActivity {
 				public void onClick(View v) {
 					int childPosition = recyclerView.getChildAdapterPosition(v);
 					items.remove(childPosition);
-//					String itemText = items.get(childPosition);
-//					Toast.makeText(FlowLayoutActivity.this, itemText + " (position = " + childPosition + ")", Toast.LENGTH_SHORT).show();
 					notifyItemRemoved(childPosition);
 				}
 			});
@@ -71,6 +69,11 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		@Override
 		public int getItemCount() {
 			return items.size();
+		}
+
+		public void insertAt(int index, String val) {
+			items.add(index, val);
+			notifyItemInserted(index);
 		}
 	}
 
@@ -83,14 +86,15 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		setSupportActionBar(toolbar);
 
 		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-		fab.setVisibility(View.INVISIBLE);
-//		fab.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//						.setAction("Action", null).show();
-//			}
-//		});
+		fab.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				int middleChildIndex = recyclerView.getChildCount() / 2;
+				int adapterIndexToInsert = recyclerView.getChildAdapterPosition(recyclerView.getChildAt(middleChildIndex));
+				String newString = generateTestString(adapter.getItemCount() % STRING_BASE_LEN);
+				adapter.insertAt(adapterIndexToInsert, newString);
+			}
+		});
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
@@ -109,7 +113,6 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		});
 		recyclerView.setLayoutManager(
 				new FlowLayoutManager());
-//				new LinearLayoutManager(this));
 	}
 
 	private static List<String> generateTestStrings() {

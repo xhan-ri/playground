@@ -25,8 +25,69 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+		Log.i(LOG_TAG, "State = " + state);
 		recyclerRef = recycler;
-		removeAndRecycleAllViews(recycler);
+		if (state.isPreLayout()) {
+			onPreLayoutChildren(recycler, state);
+		} else {
+			onRealLayoutChildren(recycler);
+		}
+	}
+
+	private void onPreLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+		int firstItemAdapterPosition = getChildAdapterPosition(0);
+		int currentItemPosition = firstItemAdapterPosition < 0 ? 0 : firstItemAdapterPosition;
+		int left = leftVisibleEdge(), top = topVisibleEdge(), height = 0;
+		int realLayoutLeft = leftVisibleEdge(), realLayoutTop = topVisibleEdge(), realLayoutHeight = 0;
+		detachAndScrapAttachedViews(recycler);
+		while (currentItemPosition < getItemCount()) {
+			View child = recycler.getViewForPosition(currentItemPosition);
+			measureChildWithMargins(child, 0, 0);
+			int childWidth = getDecoratedMeasuredWidth(child);
+			int childHeight = getDecoratedMeasuredHeight(child);
+			if (left + childWidth > rightVisibleEdge()) {
+				left = leftVisibleEdge() + childWidth;
+				top += height;
+				height = childHeight;
+			} else {
+				left += childWidth;
+				height = Math.max(height, childHeight);
+			}
+
+			if (!isChildRemoved(child)) {
+				if (realLayoutLeft + childWidth > rightVisibleEdge()) {
+					realLayoutLeft = leftVisibleEdge() + childWidth;
+					realLayoutTop += height;
+					realLayoutHeight = childHeight;
+				} else {
+					realLayoutLeft += childWidth;
+					realLayoutHeight = Math.max(realLayoutHeight, childHeight);
+				}
+			}
+			if (!childVisible(realLayoutLeft, realLayoutTop, realLayoutLeft + childWidth, realLayoutTop + childHeight)) {
+				recycler.recycleView(child);
+				break;
+			} else {
+				int right = left + childWidth;
+				int bottom = top + childHeight;
+				if (isChildRemoved(child)) {
+					addDisappearingView(child);
+				} else {
+					addView(child);
+				}
+				layoutDecorated(child, left, top, right, bottom);
+			}
+
+			currentItemPosition ++;
+		}
+	}
+
+	private void onRealLayoutChildren(RecyclerView.Recycler recycler) {
+		detachAndScrapAttachedViews(recycler);
+		layoutChildrenImpl(recycler, -1);
+	}
+
+	private void layoutChildrenImpl(RecyclerView.Recycler recycler, int endPosition) {
 		int left = recyclerView.getPaddingLeft(), top = recyclerView.getPaddingTop(), right = 0, bottom = 0;
 		int itemCount = getItemCount();
 		int containerWidth = recyclerView.getMeasuredWidth();
@@ -42,8 +103,12 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			}
 			right = left + itemWidth;
 			bottom = top + itemHeight;
-			if (childVisible(left, top, right, bottom)) {
-				addView(child);
+			if (childVisible(left, top, right, bottom) || i <= endPosition) {
+				if (isChildRemoved(child)) {
+					addDisappearingView(child);
+				} else {
+					addView(child);
+				}
 				layoutDecorated(child, left, top, right, bottom);
 			} else {
 				recycler.recycleView(child);
@@ -53,7 +118,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			currentMaxHeight = Math.max(currentMaxHeight, itemHeight);
 			left = right;
 		}
-
 	}
 
 	@Override
@@ -213,7 +277,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	@Override
 	public boolean supportsPredictiveItemAnimations() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -389,5 +453,9 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			}
 			return -offset;
 		}
+	}
+
+	private boolean isChildRemoved(View child) {
+		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
 	}
 }
