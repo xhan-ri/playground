@@ -37,50 +37,54 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	private void onPreLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int firstItemAdapterPosition = getChildAdapterPosition(0);
 		int currentItemPosition = firstItemAdapterPosition < 0 ? 0 : firstItemAdapterPosition;
-		int left = leftVisibleEdge(), top = topVisibleEdge(), height = 0;
-		int realLayoutLeft = leftVisibleEdge(), realLayoutTop = topVisibleEdge(), realLayoutHeight = 0;
+		Point point = layoutStartPoint();
+		int x = point.x, y = point.y, height = 0;
+		boolean newline;
+		int real_x = point.x, real_y = point.y, real_height = 0;
+		boolean real_newline;
+		Rect rect = new Rect();
+		Rect real_rect = new Rect();
 		detachAndScrapAttachedViews(recycler);
 		while (currentItemPosition < getItemCount()) {
 			View child = recycler.getViewForPosition(currentItemPosition);
-			measureChildWithMargins(child, 0, 0);
-			int childWidth = getDecoratedMeasuredWidth(child);
-			int childHeight = getDecoratedMeasuredHeight(child);
+			boolean childRemoved = isChildRemoved(child);
 			// act as removed view still there, to calc new items location.
-			if (left + childWidth > rightVisibleEdge()) {
-				left = leftVisibleEdge() + childWidth;
-				top += height;
-				height = childHeight;
+			newline = calcChildLayoutRect(child, x, y, height, rect);
+			if (newline) {
+				point = startNewline(rect);
+				x = point.x;
+				y = point.y;
+				height = rect.height();
 			} else {
-				left += childWidth;
-				height = Math.max(height, childHeight);
+				x = advanceInSameLine(x, rect);
+				height = Math.max(height, rect.height());
 			}
 
-			// act as removed view no longer visible, to calc when to stop adding new views.
-			if (!isChildRemoved(child)) {
-				if (realLayoutLeft + childWidth > rightVisibleEdge()) {
-					realLayoutLeft = leftVisibleEdge() + childWidth;
-					realLayoutTop += height;
-					realLayoutHeight = childHeight;
+			if (!childRemoved) {
+				real_newline = calcChildLayoutRect(child, real_x, real_y, real_height, real_rect);
+				if (real_newline) {
+					point = startNewline(real_rect);
+					real_x = point.x;
+					real_y = point.y;
+					real_height = real_rect.height();
 				} else {
-					realLayoutLeft += childWidth;
-					realLayoutHeight = Math.max(realLayoutHeight, childHeight);
+					real_x = advanceInSameLine(real_x, real_rect);
+					real_height = Math.max(real_height, real_rect.height());
 				}
 			}
+
 			// stop add new view if after removal, new items are not visible.
-			if (!childVisible(realLayoutLeft, realLayoutTop, realLayoutLeft + childWidth, realLayoutTop + childHeight)) {
+			if (!childVisible(real_x, real_y, real_x + rect.width(), real_y + rect.height())) {
 				recycler.recycleView(child);
 				break;
 			} else {
-				int right = left + childWidth;
-				int bottom = top + childHeight;
-				if (isChildRemoved(child)) {
+				if (childRemoved) {
 					addDisappearingView(child);
 				} else {
 					addView(child);
 				}
-				layoutDecorated(child, left, top, right, bottom);
+				layoutDecorated(child, rect.left, rect.top, rect.right, rect.bottom);
 			}
-
 			currentItemPosition ++;
 		}
 	}
@@ -91,7 +95,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private void layoutChildrenImpl(RecyclerView.Recycler recycler) {
-		int x = leftVisibleEdge(), y = topVisibleEdge();
+		Point startPoint = layoutStartPoint();
+		int x = startPoint.x, y = startPoint.y;
 		int itemCount = getItemCount();
 		int height = 0;
 		boolean newLine;
@@ -477,6 +482,8 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
 	}
 
+	/*****************alignment related functions*****************/
+
 	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, Rect rect) {
 		boolean newLine;
 		measureChildWithMargins(child, 0, 0);
@@ -504,5 +511,9 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private int advanceInSameLine(int x, Rect rect) {
 		return x + rect.width();
+	}
+
+	private Point layoutStartPoint() {
+		return new Point(leftVisibleEdge(), topVisibleEdge());
 	}
 }
