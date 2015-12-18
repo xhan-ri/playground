@@ -25,7 +25,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	@Override
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
-		Log.i(LOG_TAG, "State = " + state);
 		recyclerRef = recycler;
 		if (state.isPreLayout()) {
 			onPreLayoutChildren(recycler, state);
@@ -45,6 +44,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			measureChildWithMargins(child, 0, 0);
 			int childWidth = getDecoratedMeasuredWidth(child);
 			int childHeight = getDecoratedMeasuredHeight(child);
+			// act as removed view still there, to calc new items location.
 			if (left + childWidth > rightVisibleEdge()) {
 				left = leftVisibleEdge() + childWidth;
 				top += height;
@@ -54,6 +54,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				height = Math.max(height, childHeight);
 			}
 
+			// act as removed view no longer visible, to calc when to stop adding new views.
 			if (!isChildRemoved(child)) {
 				if (realLayoutLeft + childWidth > rightVisibleEdge()) {
 					realLayoutLeft = leftVisibleEdge() + childWidth;
@@ -64,6 +65,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 					realLayoutHeight = Math.max(realLayoutHeight, childHeight);
 				}
 			}
+			// stop add new view if after removal, new items are not visible.
 			if (!childVisible(realLayoutLeft, realLayoutTop, realLayoutLeft + childWidth, realLayoutTop + childHeight)) {
 				recycler.recycleView(child);
 				break;
@@ -91,15 +93,15 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		int left = recyclerView.getPaddingLeft(), top = recyclerView.getPaddingTop(), right = 0, bottom = 0;
 		int itemCount = getItemCount();
 		int containerWidth = recyclerView.getMeasuredWidth();
-		int currentMaxHeight = 0;
+		int height = 0;
 		for (int i = firstChildAdapterPosition; i < itemCount; i ++) {
 			View child = recycler.getViewForPosition(i);
 			measureChildWithMargins(child, 0, 0);
 			int itemWidth = getDecoratedMeasuredWidth(child), itemHeight = getDecoratedMeasuredHeight(child);
 			if (left + itemWidth >= containerWidth - recyclerView.getPaddingRight()) {
 				left = leftVisibleEdge();
-				top += currentMaxHeight;
-				currentMaxHeight = 0;
+				top += height;
+				height = itemHeight;
 			}
 			right = left + itemWidth;
 			bottom = top + itemHeight;
@@ -115,7 +117,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				return;
 			}
 
-			currentMaxHeight = Math.max(currentMaxHeight, itemHeight);
+			height = Math.max(height, itemHeight);
 			left = right;
 		}
 	}
@@ -206,41 +208,44 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return actualDy;
 	}
 
+	/**
+	 * Add new line of elements at top, to keep layout, have to virtually layout from beginning.
+	 */
 	private void addNewLineAtTop(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int left, bottom = getDecoratedTop(getChildAt(getMaxHeightIndexInLine(0))), top, right;
 		int maxHeight = 0;
-		List<View> newChildList = new LinkedList<>();
-		int posFromStart = 0;
+		List<View> lineChildren = new LinkedList<>();
+		int currentAdapterPosition = 0;
 		right = leftVisibleEdge();
 		int endAdapterPosition = getChildAdapterPosition(0) - 1;
-		while (posFromStart <= endAdapterPosition) {
-			View newChild = recycler.getViewForPosition(posFromStart);
+		while (currentAdapterPosition <= endAdapterPosition) {
+			View newChild = recycler.getViewForPosition(currentAdapterPosition);
 			measureChildWithMargins(newChild, 0, 0);
 			// add view to make sure not be recycled.
-			addView(newChild, newChildList.size());
+			addView(newChild, lineChildren.size());
 			if (right + getDecoratedMeasuredWidth(newChild) > rightVisibleEdge()) {
 				// end of one line, but not reach the top line yet. recycle the line and
 				// move on to next.
-				for (View viewToRecycle : newChildList) {
+				for (View viewToRecycle : lineChildren) {
 					removeAndRecycleView(viewToRecycle, recycler);
 				}
-				newChildList.clear();
-				newChildList.add(newChild);
+				lineChildren.clear();
+				lineChildren.add(newChild);
 				right = leftVisibleEdge() + getDecoratedMeasuredWidth(newChild);
 				maxHeight = getDecoratedMeasuredHeight(newChild);
 			} else {
-				newChildList.add(newChild);
+				lineChildren.add(newChild);
 				right += getDecoratedMeasuredWidth(newChild);
 				maxHeight = Math.max(maxHeight, getDecoratedMeasuredHeight(newChild));
 			}
-			posFromStart ++;
+			currentAdapterPosition ++;
 		}
 		left = leftVisibleEdge();
 		top = bottom - maxHeight;
-		for (int i = 0; i < newChildList.size(); i ++) {
-			View childView = newChildList.get(i);
+		for (int i = 0; i < lineChildren.size(); i ++) {
+			View childView = lineChildren.get(i);
 			right = left + getDecoratedMeasuredWidth(childView);
-			layoutDecorated(childView, left, top, right, bottom);
+			layoutDecorated(childView, left, top, right, top + getDecoratedMeasuredHeight(childView));
 			left = right;
 		}
 	}
@@ -342,8 +347,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			final View beforeChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(beforeChild) > maxHeightBefore) {
 				maxIndexBefore = currentIndex;
+				maxHeightBefore = getDecoratedMeasuredHeight(beforeChild);
 			}
 			currentIndex --;
+		}
+		// count in first one in line
+		if (maxHeightBefore < getDecoratedMeasuredHeight(getChildAt(currentIndex))) {
+			maxIndexBefore = currentIndex;
+			maxHeightBefore = getDecoratedMeasuredHeight(getChildAt(currentIndex));
 		}
 
 		currentIndex = index;
@@ -351,8 +362,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			final View afterChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(afterChild) > maxHeightAfter) {
 				maxIndexAfter = currentIndex;
+				maxHeightAfter = getDecoratedMeasuredHeight(afterChild);
 			}
 			currentIndex ++;
+		}
+		// count in last one in line
+		if (maxHeightAfter < getDecoratedMeasuredHeight(getChildAt(currentIndex))) {
+			maxIndexAfter = currentIndex;
+			maxHeightAfter = getDecoratedMeasuredHeight(getChildAt(currentIndex));
 		}
 		if (maxHeightBefore >= maxHeightAfter) {
 			return maxIndexBefore;
@@ -432,7 +449,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				return offset;
 			}
 		} else {
-			// target is off screen top, Need to start from beginning in dataset
+			// target is off screen top, Need to start from beginning in data set
 			int targetAdapterPosition = 0, left = leftVisibleEdge(), height = 0;
 			int offset = topVisibleEdge() - getDecoratedTop(getChildAt(0));
 			// first find out target item location
