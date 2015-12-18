@@ -1,5 +1,6 @@
 package org.xiaofeng.playground;
 
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearSmoothScroller;
@@ -90,14 +91,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private void layoutChildrenImpl(RecyclerView.Recycler recycler) {
-		int left = leftVisibleEdge(), top = topVisibleEdge();
+		int x = leftVisibleEdge(), y = topVisibleEdge();
 		int itemCount = getItemCount();
 		int height = 0;
 		boolean newLine;
 		Rect rect = new Rect();
 		for (int i = firstChildAdapterPosition; i < itemCount; i ++) {
 			View child = recycler.getViewForPosition(i);
-			newLine = calcChildLayoutRect(child, left, top, height, rect);
+			newLine = calcChildLayoutRect(child, x, y, height, rect);
 			if (!childVisible(rect)) {
 				recycler.recycleView(child);
 				return;
@@ -107,11 +108,12 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			}
 
 			if (newLine) {
-				left = leftVisibleEdge() + rect.width();
-				top = rect.top;
+				Point lineInfo = startNewline(rect);
+				x = lineInfo.x;
+				y = lineInfo.y;
 				height = rect.height();
 			} else {
-				left += rect.width();
+				x = advanceInSameLine(x, rect);
 				height = Math.max(height, rect.height());
 			}
 		}
@@ -494,5 +496,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			rect.bottom = rect.top + childHeight;
 		}
 		return newLine;
+	}
+
+	private Point startNewline(Rect rect) {
+		return new Point(leftVisibleEdge() + rect.width(), rect.top);
+	}
+
+	private int advanceInSameLine(int x, Rect rect) {
+		return x + rect.width();
 	}
 }
