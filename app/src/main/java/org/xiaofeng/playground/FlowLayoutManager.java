@@ -214,63 +214,67 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	 * Add new line of elements at top, to keep layout, have to virtually layout from beginning.
 	 */
 	private void addNewLineAtTop(RecyclerView.Recycler recycler, RecyclerView.State state) {
-		int left, bottom = getDecoratedTop(getChildAt(getMaxHeightIndexInLine(0))), top, right;
-		int maxHeight = 0;
+		int x = layoutStartPoint().x, bottom = getDecoratedTop(getChildAt(getMaxHeightIndexInLine(0))), y, right;
+		int height = 0;
 		List<View> lineChildren = new LinkedList<>();
 		int currentAdapterPosition = 0;
 		right = leftVisibleEdge();
 		int endAdapterPosition = getChildAdapterPosition(0) - 1;
+		Rect rect = new Rect();
+		boolean newline;
 		while (currentAdapterPosition <= endAdapterPosition) {
 			View newChild = recycler.getViewForPosition(currentAdapterPosition);
-			measureChildWithMargins(newChild, 0, 0);
+
+			newline = calcChildLayoutRect(newChild, x, 0, height, rect);
 			// add view to make sure not be recycled.
 			addView(newChild, lineChildren.size());
-			if (right + getDecoratedMeasuredWidth(newChild) > rightVisibleEdge()) {
+			if (newline) {
 				// end of one line, but not reach the top line yet. recycle the line and
 				// move on to next.
 				for (View viewToRecycle : lineChildren) {
 					removeAndRecycleView(viewToRecycle, recycler);
 				}
 				lineChildren.clear();
-				lineChildren.add(newChild);
-				right = leftVisibleEdge() + getDecoratedMeasuredWidth(newChild);
-				maxHeight = getDecoratedMeasuredHeight(newChild);
+				x = advanceInSameLine(layoutStartPoint().x, rect);
+				height = rect.height();
 			} else {
-				lineChildren.add(newChild);
-				right += getDecoratedMeasuredWidth(newChild);
-				maxHeight = Math.max(maxHeight, getDecoratedMeasuredHeight(newChild));
+				x = advanceInSameLine(x, rect);
+				height = Math.max(height, rect.height());
 			}
+			lineChildren.add(newChild);
 			currentAdapterPosition ++;
+
 		}
-		left = leftVisibleEdge();
-		top = bottom - maxHeight;
+
+		x = layoutStartPoint().x;
+		y = bottom - height;
 		for (int i = 0; i < lineChildren.size(); i ++) {
 			View childView = lineChildren.get(i);
-			right = left + getDecoratedMeasuredWidth(childView);
-			layoutDecorated(childView, left, top, right, top + getDecoratedMeasuredHeight(childView));
-			left = right;
+			calcChildLayoutRect(childView, x, y, height, rect);
+			layoutDecorated(childView, rect.left, rect.top, rect.right, rect.bottom);
+			x = advanceInSameLine(x, rect);
 		}
 	}
 	private void addNewLineAtBottom(RecyclerView.Recycler recycler, RecyclerView.State state) {
-		int left = leftVisibleEdge(), top = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1)));
-		int right = left, bottom = top;
+		int x = layoutStartPoint().x, y = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1)));
+		int right = x, bottom = y;
 		int childAdapterPosition = getChildAdapterPosition(getChildCount() - 1) + 1;
 		// no item to add
 		if (childAdapterPosition == getItemCount()) {
 			return;
 		}
+		Rect rect = new Rect();
+		boolean newline;
 		while (childAdapterPosition < getItemCount()) {
 			View newChild = recycler.getViewForPosition(childAdapterPosition);
-			measureChildWithMargins(newChild, 0, 0);
-			if (left + getDecoratedMeasuredWidth(newChild) > rightVisibleEdge()) {
+			newline = calcChildLayoutRect(newChild, x, y, 0, rect);
+			if (newline) {
 				recycler.recycleView(newChild);
 				return;
 			} else {
 				addView(newChild);
-				right = left + getDecoratedMeasuredWidth(newChild);
-				bottom = top + getDecoratedMeasuredHeight(newChild);
-				layoutDecorated(newChild, left, top, right, bottom);
-				left = right;
+				layoutDecorated(newChild, rect.left, rect.top, rect.right, rect.bottom);
+				x = advanceInSameLine(x, rect);
 				childAdapterPosition ++;
 			}
 		}
@@ -330,26 +334,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return Rect.intersects(new Rect(leftVisibleEdge(), topVisibleEdge(), rightVisibleEdge(), bottomVisibleEdge()), childRect);
 	}
 
-	private boolean firstOneInTheLine(int index) {
-		if (index == 0) {
-			return true;
-		} else {
-			return getDecoratedLeft(getChildAt(index)) <= leftVisibleEdge();
-		}
-	}
-
-	private boolean lastOneInTheLine(int index) {
-		if (getChildCount() == 0 || index == getChildCount() - 1) {
-			return true;
-		}
-		return firstOneInTheLine(index + 1);
-	}
-
 	private int getMaxHeightIndexInLine(int index) {
 		final View child = getChildAt(index);
 		int maxIndexBefore = index, maxIndexAfter = index, maxHeightBefore = getDecoratedMeasuredHeight(child), maxHeightAfter = getDecoratedMeasuredHeight(child);
 		int currentIndex = index;
-		while (currentIndex >= 0 && !firstOneInTheLine(currentIndex)) {
+		while (currentIndex >= 0 && !startOfLine(currentIndex)) {
 			final View beforeChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(beforeChild) > maxHeightBefore) {
 				maxIndexBefore = currentIndex;
@@ -364,7 +353,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		}
 
 		currentIndex = index;
-		while (currentIndex < getChildCount() && !lastOneInTheLine(currentIndex)) {
+		while (currentIndex < getChildCount() && !endOfLine(currentIndex)) {
 			final View afterChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(afterChild) > maxHeightAfter) {
 				maxIndexAfter = currentIndex;
@@ -385,14 +374,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private List<View> getAllViewsInLine(int index) {
 		int firstItemIndex = index;
-		while(!firstOneInTheLine(firstItemIndex)) {
+		while(!startOfLine(firstItemIndex)) {
 			firstItemIndex --;
 		}
 
 		List<View> viewList = new LinkedList<>();
 		viewList.add(getChildAt(firstItemIndex));
 		int nextItemIndex = firstItemIndex + 1;
-		while (nextItemIndex < getChildCount() && !firstOneInTheLine(nextItemIndex)) {
+		while (nextItemIndex < getChildCount() && !startOfLine(nextItemIndex)) {
 			viewList.add(getChildAt(nextItemIndex));
 			nextItemIndex ++;
 		}
@@ -419,13 +408,13 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private int getOffsetOfItemToFirstChild(int adapterPosition, RecyclerView.Recycler recycler) {
-		int firstChildAdapterPosition = getChildAdapterPosition(0);
-		if (firstChildAdapterPosition == adapterPosition) {
+		int firstChildPosition = getChildAdapterPosition(0);
+		if (firstChildPosition == adapterPosition) {
 			// first child is target, just make sure it is fully visible.
 			return topVisibleEdge() - getDecoratedTop(getChildAt(0));
 		}
 
-		if (adapterPosition > firstChildAdapterPosition) {
+		if (adapterPosition > firstChildPosition) {
 			int lastChildAdapterPosition = getChildAdapterPosition(getChildCount() - 1);
 			// target child in screen, no need to calc.
 			if (lastChildAdapterPosition >= adapterPosition) {
@@ -433,48 +422,50 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				return getDecoratedTop(getChildAt(targetChildIndex)) - topVisibleEdge();
 			} else {
 				// target child is below screen edge
-				int offset = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1))) - topVisibleEdge();
+				int y = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1))) - topVisibleEdge();
 				int targetAdapterPosition = lastChildAdapterPosition + 1;
-				int left = leftVisibleEdge();
+				int x = layoutStartPoint().x;
 				int height = 0;
+				Rect rect = new Rect();
+				boolean newline;
 				while (targetAdapterPosition != adapterPosition) {
 					View nextChild = recycler.getViewForPosition(targetAdapterPosition);
-					measureChildWithMargins(nextChild, 0, 0);
-					if (left + getDecoratedMeasuredWidth(nextChild) > rightVisibleEdge()) {
-						// should start a new line
-						offset += height;
-						left = leftVisibleEdge() + getDecoratedMeasuredWidth(nextChild);
-						height = getDecoratedMeasuredHeight(nextChild);
+					newline = calcChildLayoutRect(nextChild, x, y, height, rect);
+					if (newline) {
+						x = advanceInSameLine(layoutStartPoint().x, rect);
+						y = rect.top;
+						height = rect.height();
 					} else {
-						left += getDecoratedMeasuredWidth(nextChild);
+						x = advanceInSameLine(x, rect);
 						height = Math.max(height, getDecoratedMeasuredHeight(nextChild));
 					}
 					recycler.recycleView(nextChild);
 					targetAdapterPosition ++;
 				}
-				return offset;
+				return y;
 			}
 		} else {
 			// target is off screen top, Need to start from beginning in data set
-			int targetAdapterPosition = 0, left = leftVisibleEdge(), height = 0;
-			int offset = topVisibleEdge() - getDecoratedTop(getChildAt(0));
-			// first find out target item location
-			while (targetAdapterPosition <= firstChildAdapterPosition) {
+			int targetAdapterPosition = 0, x = layoutStartPoint().x, height = 0;
+			int y = topVisibleEdge() - getDecoratedTop(getChildAt(0));
+			Rect rect = new Rect();
+			boolean newline;
+			while (targetAdapterPosition <= firstChildPosition) {
 				View child = recycler.getViewForPosition(targetAdapterPosition);
-				measureChildWithMargins(child, 0, 0);
-				if (left + getDecoratedMeasuredWidth(child) > rightVisibleEdge()) {
-					left = leftVisibleEdge() + getDecoratedMeasuredWidth(child);
-					height = getDecoratedMeasuredHeight(child);
-					if (targetAdapterPosition >= targetAdapterPosition) {
-						offset += height;
+				newline = calcChildLayoutRect(child, x, y, height, rect);
+				if (newline) {
+					x = advanceInSameLine(layoutStartPoint().x, rect);
+					height = rect.height();
+					if (targetAdapterPosition >= adapterPosition) {
+						y += height;
 					}
 				} else {
-					left += getDecoratedMeasuredWidth(child);
+					x = advanceInSameLine(x, rect);
 					height = Math.max(height, getDecoratedMeasuredHeight(child));
 				}
 				targetAdapterPosition ++;
 			}
-			return -offset;
+			return -y;
 		}
 	}
 
@@ -515,5 +506,20 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private Point layoutStartPoint() {
 		return new Point(leftVisibleEdge(), topVisibleEdge());
+	}
+
+	private boolean startOfLine(int index) {
+		if (index == 0) {
+			return true;
+		} else {
+			return getDecoratedLeft(getChildAt(index)) <= leftVisibleEdge();
+		}
+	}
+
+	private boolean endOfLine(int index) {
+		if (getChildCount() == 0 || index == getChildCount() - 1) {
+			return true;
+		}
+		return startOfLine(index + 1);
 	}
 }

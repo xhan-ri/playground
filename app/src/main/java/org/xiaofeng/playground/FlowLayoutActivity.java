@@ -27,7 +27,7 @@ public class FlowLayoutActivity extends AppCompatActivity {
 	private static final int MIN_LEN = 3;
 	private static final int MAX_LEN = 10;
 	private static final int MAX_LINES = 1;
-	private static final int TEST_ITEM_SIZE = 100;
+	private static final int TEST_ITEM_SIZE = 400;
 	private static final Random random = new Random();
 	private static final String STRING_BASE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 	private static final int STRING_BASE_LEN = STRING_BASE.length();
@@ -54,12 +54,17 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		}
 
 		@Override
-		public void onBindViewHolder(FlowItemViewHolder holder, final int position) {
+		public void onBindViewHolder(final FlowItemViewHolder holder, final int position) {
 			holder.itemText.setText(items.get(position));
 			holder.itemText.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					int childPosition = recyclerView.getChildAdapterPosition(v);
+//					remove5Items(childPosition);
+					toastChildInfo(childPosition);
+				}
+
+				private void remove5Items(int childPosition) {
 					int firstPosition = childPosition - 2;
 					firstPosition = Math.max(firstPosition, 0);
 					int lastPosition = childPosition + 2;
@@ -70,6 +75,11 @@ public class FlowLayoutActivity extends AppCompatActivity {
 						index --;
 					}
 					notifyItemRangeRemoved(firstPosition, lastPosition - firstPosition + 1);
+				}
+
+				private void toastChildInfo(int childPosition) {
+					String text = items.get(childPosition);
+					Toast.makeText(holder.itemView.getContext(), text + " (position = " + childPosition + ")", Toast.LENGTH_SHORT).show();
 				}
 			});
 		}
