@@ -60,8 +60,16 @@ public class FlowLayoutActivity extends AppCompatActivity {
 				@Override
 				public void onClick(View v) {
 					int childPosition = recyclerView.getChildAdapterPosition(v);
-					items.remove(childPosition);
-					notifyItemRemoved(childPosition);
+					int firstPosition = childPosition - 2;
+					firstPosition = Math.max(firstPosition, 0);
+					int lastPosition = childPosition + 2;
+					lastPosition = Math.min(lastPosition, getItemCount() - 1);
+					int index = lastPosition;
+					while (index >= firstPosition) {
+						items.remove(index);
+						index --;
+					}
+					notifyItemRangeRemoved(firstPosition, lastPosition - firstPosition + 1);
 				}
 			});
 		}
