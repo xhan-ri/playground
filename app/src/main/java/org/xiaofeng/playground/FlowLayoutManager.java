@@ -5,8 +5,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.util.SparseIntArray;
 import android.view.View;
 
 import java.util.LinkedList;
@@ -353,7 +351,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		final View child = getChildAt(index);
 		int maxIndexBefore = index, maxIndexAfter = index, maxHeightBefore = getDecoratedMeasuredHeight(child), maxHeightAfter = getDecoratedMeasuredHeight(child);
 		int currentIndex = index;
-		while (currentIndex >= 0 && !startOfLine(currentIndex)) {
+		while (currentIndex >= 0 && !isStartOfLine(currentIndex)) {
 			final View beforeChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(beforeChild) > maxHeightBefore) {
 				maxIndexBefore = currentIndex;
@@ -368,7 +366,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		}
 
 		currentIndex = index;
-		while (currentIndex < getChildCount() && !endOfLine(currentIndex)) {
+		while (currentIndex < getChildCount() && !isEndOfLine(currentIndex)) {
 			final View afterChild = getChildAt(currentIndex);
 			if (getDecoratedMeasuredHeight(afterChild) > maxHeightAfter) {
 				maxIndexAfter = currentIndex;
@@ -389,14 +387,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private List<View> getAllViewsInLine(int index) {
 		int firstItemIndex = index;
-		while(!startOfLine(firstItemIndex)) {
+		while(!isStartOfLine(firstItemIndex)) {
 			firstItemIndex --;
 		}
 
 		List<View> viewList = new LinkedList<>();
 		viewList.add(getChildAt(firstItemIndex));
 		int nextItemIndex = firstItemIndex + 1;
-		while (nextItemIndex < getChildCount() && !startOfLine(nextItemIndex)) {
+		while (nextItemIndex < getChildCount() && !isStartOfLine(nextItemIndex)) {
 			viewList.add(getChildAt(nextItemIndex));
 			nextItemIndex ++;
 		}
@@ -487,6 +485,9 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		}
 	}
 
+	/**
+	 * Is child has been marked as removed.
+	 */
 	private boolean isChildRemoved(View child) {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
 	}
@@ -572,7 +573,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		}
 	}
 
-	private boolean startOfLine(int index) {
+	private boolean isStartOfLine(int index) {
 		if (index == 0) {
 			return true;
 		} else {
@@ -586,10 +587,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		}
 	}
 
-	private boolean endOfLine(int index) {
+	private boolean isEndOfLine(int index) {
 		if (getChildCount() == 0 || index == getChildCount() - 1) {
 			return true;
 		}
-		return startOfLine(index + 1);
+		return isStartOfLine(index + 1);
 	}
 }
