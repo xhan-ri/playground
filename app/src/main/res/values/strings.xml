@@ -14,4 +14,5 @@
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
     <string name="title_activity_flow_layout">Flow layout</string>
+    <string name="title_activity_image"></string>
 </resources>

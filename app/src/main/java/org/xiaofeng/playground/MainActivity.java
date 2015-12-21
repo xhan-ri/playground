@@ -1,8 +1,8 @@
 package org.xiaofeng.playground;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -43,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View v) {
 				startActivity(new Intent(MainActivity.this, FlowLayoutActivity.class));
+			}
+		});
+		findViewById(R.id.image_util_button).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, ImageActivity.class));
 			}
 		});
 	}
