@@ -60,8 +60,8 @@ public class FlowLayoutActivity extends AppCompatActivity {
 				@Override
 				public void onClick(View v) {
 					int childPosition = recyclerView.getChildAdapterPosition(v);
-//					remove5Items(childPosition);
-					toastChildInfo(childPosition);
+					remove5Items(childPosition);
+//					toastChildInfo(childPosition);
 				}
 
 				private void remove5Items(int childPosition) {
@@ -130,7 +130,7 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			}
 		});
 		recyclerView.setLayoutManager(
-				new FlowLayoutManager().setAlignment(FlowLayoutManager.Alignment.RIGHT));
+				new FlowLayoutManager());
 	}
 
 	private static List<String> generateTestStrings() {

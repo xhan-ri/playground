@@ -6,13 +6,15 @@ import android.graphics.Rect;
 import android.support.v7.widget.LinearSmoothScroller;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.view.View;
 
 import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by xiaofeng on 12/15/15.
+ * Layout manager for flow views. support different view height, support item add/removed notification
+ * support align to left/right edge. support scroll/smooth scroll.
  */
 public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	enum Alignment {
@@ -33,13 +35,14 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		recyclerRef = recycler;
 		if (state.isPreLayout()) {
-			onPreLayoutChildren(recycler, state);
+			onPreLayoutChildren(recycler);
 		} else {
 			onRealLayoutChildren(recycler);
 		}
 	}
 
-	private void onPreLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
+	private void onPreLayoutChildren(RecyclerView.Recycler recycler) {
+		// start from first view child
 		int firstItemAdapterPosition = getChildAdapterPosition(0);
 		int currentItemPosition = firstItemAdapterPosition < 0 ? 0 : firstItemAdapterPosition;
 		Point point = layoutStartPoint();
@@ -49,7 +52,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		boolean real_newline;
 		Rect rect = new Rect();
 		Rect real_rect = new Rect();
+		// detach all first.
 		detachAndScrapAttachedViews(recycler);
+
+		// track before removed and after removed layout in same time, to make sure only add items at
+		// bottom that visible after item removed.
 		while (currentItemPosition < getItemCount()) {
 			View child = recycler.getViewForPosition(currentItemPosition);
 			boolean childRemoved = isChildRemoved(child);
@@ -148,7 +155,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	/**
-	 * Contents moving up,
+	 * Contents moving up to top
 	 */
 	private int contentMoveUp(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int actualDy = dy;
@@ -180,6 +187,9 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return actualDy;
 	}
 
+	/**
+	 * Contents move down to bottom
+	 */
 	private int contentMoveDown(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int actualDy = dy;
 		int maxHeightItemIndex = getMaxHeightIndexInLine(0);
@@ -256,6 +266,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			x = advanceInSameLine(x, rect);
 		}
 	}
+
+	/**
+	 * Add new line at bottom of views.
+	 */
 	private void addNewLineAtBottom(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int x = layoutStartPoint().x, y = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1)));
 		int right = x, bottom = y;
@@ -390,7 +404,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private int getChildAdapterPosition(int index) {
-		final View child = getChildAt(index);
+		return getChildAdapterPosition(getChildAt(index));
+	}
+
+	private int getChildAdapterPosition(View child) {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).getViewAdapterPosition();
 	}
 
@@ -474,10 +491,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
 	}
 
-	public Alignment getAlignment() {
-		return alignment;
-	}
-
 	public FlowLayoutManager setAlignment(Alignment alignment) {
 		this.alignment = alignment;
 		return this;
@@ -487,7 +500,9 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, Rect rect) {
 		boolean newLine;
+
 		measureChildWithMargins(child, 0, 0);
+
 		int childWidth = getDecoratedMeasuredWidth(child);
 		int childHeight = getDecoratedMeasuredHeight(child);
 		switch (alignment) {
