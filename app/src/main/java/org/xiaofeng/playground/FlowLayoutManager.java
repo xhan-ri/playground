@@ -15,10 +15,15 @@ import java.util.List;
  * Created by xiaofeng on 12/15/15.
  */
 public class FlowLayoutManager extends RecyclerView.LayoutManager {
+	enum Alignment {
+		LEFT,
+		RIGHT
+	}
 	private static final String LOG_TAG = "FlowLayoutManager";
 	RecyclerView recyclerView;
 	int firstChildAdapterPosition = 0;
 	RecyclerView.Recycler recyclerRef;
+	private Alignment alignment = Alignment.LEFT;
 	@Override
 	public RecyclerView.LayoutParams generateDefaultLayoutParams() {
 		return new RecyclerView.LayoutParams(RecyclerView.LayoutParams.WRAP_CONTENT, RecyclerView.LayoutParams.WRAP_CONTENT);
@@ -91,10 +96,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 
 	private void onRealLayoutChildren(RecyclerView.Recycler recycler) {
 		detachAndScrapAttachedViews(recycler);
-		layoutChildrenImpl(recycler);
-	}
-
-	private void layoutChildrenImpl(RecyclerView.Recycler recycler) {
 		Point startPoint = layoutStartPoint();
 		int x = startPoint.x, y = startPoint.y;
 		int itemCount = getItemCount();
@@ -473,6 +474,15 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		return ((RecyclerView.LayoutParams)child.getLayoutParams()).isItemRemoved();
 	}
 
+	public Alignment getAlignment() {
+		return alignment;
+	}
+
+	public FlowLayoutManager setAlignment(Alignment alignment) {
+		this.alignment = alignment;
+		return this;
+	}
+
 	/*****************alignment related functions*****************/
 
 	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, Rect rect) {
@@ -480,39 +490,84 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		measureChildWithMargins(child, 0, 0);
 		int childWidth = getDecoratedMeasuredWidth(child);
 		int childHeight = getDecoratedMeasuredHeight(child);
-		if (x + childWidth > rightVisibleEdge()) {
-			newLine = true;
-			rect.left = leftVisibleEdge();
-			rect.top = y + lineHeight;
-			rect.right = rect.left + childWidth;
-			rect.bottom = rect.top + childHeight;
-		} else {
-			newLine = false;
-			rect.left = x;
-			rect.top = y;
-			rect.right = rect.left + childWidth;
-			rect.bottom = rect.top + childHeight;
+		switch (alignment) {
+			case RIGHT:
+				if (x - childWidth < leftVisibleEdge()) {
+					newLine = true;
+					rect.left = rightVisibleEdge() - childWidth;
+					rect.top = y + lineHeight;
+					rect.right = rightVisibleEdge();
+					rect.bottom = rect.top + childHeight;
+				} else {
+					newLine = false;
+					rect.left = x - childWidth;
+					rect.top = y;
+					rect.right = x;
+					rect.bottom = rect.top + childHeight;
+				}
+				break;
+			case LEFT:
+			default:
+				if (x + childWidth > rightVisibleEdge()) {
+					newLine = true;
+					rect.left = leftVisibleEdge();
+					rect.top = y + lineHeight;
+					rect.right = rect.left + childWidth;
+					rect.bottom = rect.top + childHeight;
+				} else {
+					newLine = false;
+					rect.left = x;
+					rect.top = y;
+					rect.right = rect.left + childWidth;
+					rect.bottom = rect.top + childHeight;
+				}
+				break;
 		}
+
 		return newLine;
 	}
 
 	private Point startNewline(Rect rect) {
-		return new Point(leftVisibleEdge() + rect.width(), rect.top);
+		switch (alignment) {
+			case RIGHT:
+				return new Point(rightVisibleEdge() - rect.width(), rect.top);
+			case LEFT:
+			default:
+				return new Point(leftVisibleEdge() + rect.width(), rect.top);
+		}
+
 	}
 
 	private int advanceInSameLine(int x, Rect rect) {
-		return x + rect.width();
+		switch (alignment) {
+			case RIGHT:
+				return x - rect.width();
+			case LEFT:
+			default:
+				return x + rect.width();
+		}
 	}
 
 	private Point layoutStartPoint() {
-		return new Point(leftVisibleEdge(), topVisibleEdge());
+		switch (alignment) {
+			case RIGHT:
+				return new Point(rightVisibleEdge(), topVisibleEdge());
+			default:
+				return new Point(leftVisibleEdge(), topVisibleEdge());
+		}
 	}
 
 	private boolean startOfLine(int index) {
 		if (index == 0) {
 			return true;
 		} else {
-			return getDecoratedLeft(getChildAt(index)) <= leftVisibleEdge();
+			switch (alignment) {
+				case RIGHT:
+					return getDecoratedRight(getChildAt(index)) >= rightVisibleEdge();
+				case LEFT:
+				default:
+					return getDecoratedLeft(getChildAt(index)) <= leftVisibleEdge();
+			}
 		}
 	}
 

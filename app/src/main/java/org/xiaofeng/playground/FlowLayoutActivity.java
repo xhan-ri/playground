@@ -130,7 +130,7 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			}
 		});
 		recyclerView.setLayoutManager(
-				new FlowLayoutManager());
+				new FlowLayoutManager().setAlignment(FlowLayoutManager.Alignment.RIGHT));
 	}
 
 	private static List<String> generateTestStrings() {
