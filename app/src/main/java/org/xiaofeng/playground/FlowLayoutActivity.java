@@ -179,9 +179,21 @@ public class FlowLayoutActivity extends AppCompatActivity {
 		} else if (id == R.id.smooth_scroll_to_middle) {
 			recyclerView.smoothScrollToPosition(TEST_ITEM_SIZE / 2);
 		} else if (id == R.id.align_left) {
-			recyclerView.setLayoutManager(new FlowLayoutManager().setAlignment(FlowLayoutManager.Alignment.LEFT));
+			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
+			flowLayoutManager.setAlignment(FlowLayoutManager.Alignment.LEFT);
+			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
 		} else if (id == R.id.align_right) {
-			recyclerView.setLayoutManager(new FlowLayoutManager().setAlignment(FlowLayoutManager.Alignment.RIGHT));
+			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
+			flowLayoutManager.setAlignment(FlowLayoutManager.Alignment.RIGHT);
+			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
+		} else if (id == R.id.single_item_per_line) {
+			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
+			flowLayoutManager.singleItemPerLine();
+			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
+		} else if (id == R.id.remove_item_per_line_limit) {
+			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
+			flowLayoutManager.removeItemPerLineLimit();
+			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
 		}
 		return super.onOptionsItemSelected(item);
 	}
