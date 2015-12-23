@@ -90,6 +90,12 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			items.add(index, val);
 			notifyItemInserted(index);
 		}
+
+		public void clear() {
+			int itemSize = items.size();
+			items.clear();
+			notifyItemRangeRemoved(0, itemSize);
+		}
 	}
 
 	FlowLayoutAdapter adapter;
@@ -194,6 +200,8 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
 			flowLayoutManager.removeItemPerLineLimit();
 			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
+		} else if (id == R.id.clear) {
+			((FlowLayoutAdapter)recyclerView.getAdapter()).clear();
 		}
 		return super.onOptionsItemSelected(item);
 	}

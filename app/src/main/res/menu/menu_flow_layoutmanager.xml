@@ -6,4 +6,5 @@
     <item android:id="@+id/align_right" android:title="Align right" />
     <item android:id="@+id/single_item_per_line" android:title="Single item per line"/>
     <item android:id="@+id/remove_item_per_line_limit" android:title="Remove item per line limit"/>
+    <item android:id="@+id/clear" android:title="Clear" />
 </menu>
