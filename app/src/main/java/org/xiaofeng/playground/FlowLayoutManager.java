@@ -63,7 +63,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		// start from first view child
 		int firstItemAdapterPosition = getChildAdapterPosition(0);
 		int currentItemPosition = firstItemAdapterPosition < 0 ? 0 : firstItemAdapterPosition;
-		Point point = layoutStartPoint();
+		Point point = layoutStartPoint(flowLayoutOptions);
 		int x = point.x, y = point.y, height = 0;
 		boolean newline;
 		int real_x = point.x, real_y = point.y, real_height = 0;
@@ -73,32 +73,36 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		// detach all first.
 		detachAndScrapAttachedViews(recycler);
 
+		// this option use old options alignment & new options line limit to calc items for animation.
+		FlowLayoutOptions options = FlowLayoutOptions.clone(flowLayoutOptions);
+		options.itemsPerLine = newFlowLayoutOptions.itemsPerLine;
+
 		// track before removed and after removed layout in same time, to make sure only add items at
 		// bottom that visible after item removed.
 		while (currentItemPosition < getItemCount()) {
 			View child = recycler.getViewForPosition(currentItemPosition);
 			boolean childRemoved = isChildRemoved(child);
 			// act as removed view still there, to calc new items location.
-			newline = calcChildLayoutRect(child, x, y, height, rect);
+			newline = calcChildLayoutRect(child, x, y, height,flowLayoutOptions, rect);
 			if (newline) {
-				point = startNewline(rect);
+				point = startNewline(rect, flowLayoutOptions);
 				x = point.x;
 				y = point.y;
 				height = rect.height();
 			} else {
-				x = advanceInSameLine(x, rect);
+				x = advanceInSameLine(x, rect, flowLayoutOptions);
 				height = Math.max(height, rect.height());
 			}
 
 			if (!childRemoved) {
-				real_newline = calcChildLayoutRect(child, real_x, real_y, real_height, real_rect);
+				real_newline = calcChildLayoutRect(child, real_x, real_y, real_height, options, real_rect);
 				if (real_newline) {
-					point = startNewline(real_rect);
+					point = startNewline(real_rect, options);
 					real_x = point.x;
 					real_y = point.y;
 					real_height = real_rect.height();
 				} else {
-					real_x = advanceInSameLine(real_x, real_rect);
+					real_x = advanceInSameLine(real_x, real_rect, options);
 					real_height = Math.max(real_height, real_rect.height());
 				}
 			}
@@ -225,7 +229,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 			return dy;
 		}
 		while (getChildAdapterPosition(0) > 0) {
-			addNewLineAtTop(recycler, state);
+			addNewLineAtTop(recycler);
 			maxHeightItemIndex = getMaxHeightIndexInLine(0);
 			maxHeightItem = getChildAt(maxHeightItemIndex);
 			offScreenTop += getDecoratedMeasuredHeight(maxHeightItem);
@@ -249,12 +253,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	/**
 	 * Add new line of elements at top, to keep layout, have to virtually layout from beginning.
 	 */
-	private void addNewLineAtTop(RecyclerView.Recycler recycler, RecyclerView.State state) {
-		int x = layoutStartPoint().x, bottom = getDecoratedTop(getChildAt(getMaxHeightIndexInLine(0))), y, right;
+	private void addNewLineAtTop(RecyclerView.Recycler recycler) {
+		int x = layoutStartPoint().x, bottom = getDecoratedTop(getChildAt(getMaxHeightIndexInLine(0))), y;
 		int height = 0;
 		List<View> lineChildren = new LinkedList<>();
 		int currentAdapterPosition = 0;
-		right = leftVisibleEdge();
 		int endAdapterPosition = getChildAdapterPosition(0) - 1;
 		Rect rect = new Rect();
 		boolean newline;
@@ -553,17 +556,17 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	/*****************alignment related functions*****************/
-
 	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, Rect rect) {
+		return calcChildLayoutRect(child, x, y, lineHeight, flowLayoutOptions, rect);
+	}
+	private boolean calcChildLayoutRect(View child, int x, int y, int lineHeight, FlowLayoutOptions options, Rect rect) {
 		boolean newLine;
-
 		measureChildWithMargins(child, 0, 0);
-
 		int childWidth = getDecoratedMeasuredWidth(child);
 		int childHeight = getDecoratedMeasuredHeight(child);
 		switch (flowLayoutOptions.alignment) {
 			case RIGHT:
-				if (shouldStartNewline(x, childWidth)) {
+				if (shouldStartNewline(x, childWidth, options)) {
 					newLine = true;
 					rect.left = rightVisibleEdge() - childWidth;
 					rect.top = y + lineHeight;
@@ -579,7 +582,7 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 				break;
 			case LEFT:
 			default:
-				if (shouldStartNewline(x, childWidth)) {
+				if (shouldStartNewline(x, childWidth, options)) {
 					newLine = true;
 					rect.left = leftVisibleEdge();
 					rect.top = y + lineHeight;
@@ -599,7 +602,11 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private Point startNewline(Rect rect) {
-		switch (flowLayoutOptions.alignment) {
+		return startNewline(rect, flowLayoutOptions);
+
+	}
+	private Point startNewline(Rect rect, FlowLayoutOptions options) {
+		switch (options.alignment) {
 			case RIGHT:
 				return new Point(rightVisibleEdge() - rect.width(), rect.top);
 			case LEFT:
@@ -610,7 +617,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private int advanceInSameLine(int x, Rect rect) {
-		switch (flowLayoutOptions.alignment) {
+		return advanceInSameLine(x, rect, flowLayoutOptions);
+	}
+	private int advanceInSameLine(int x, Rect rect, FlowLayoutOptions options) {
+		switch (options.alignment) {
 			case RIGHT:
 				return x - rect.width();
 			case LEFT:
@@ -620,7 +630,10 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private Point layoutStartPoint() {
-		switch (flowLayoutOptions.alignment) {
+		return layoutStartPoint(flowLayoutOptions);
+	}
+	private Point layoutStartPoint(FlowLayoutOptions options) {
+		switch (options.alignment) {
 			case RIGHT:
 				return new Point(rightVisibleEdge(), topVisibleEdge());
 			default:
@@ -629,13 +642,16 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private boolean isStartOfLine(int index) {
+		return isStartOfLine(index, flowLayoutOptions);
+	}
+	private boolean isStartOfLine(int index, FlowLayoutOptions options) {
 		if (index == 0) {
 			return true;
 		} else {
-			if (flowLayoutOptions.itemsPerLine == 1) {
+			if (options.itemsPerLine == 1) {
 				return true;
 			}
-			switch (flowLayoutOptions.alignment) {
+			switch (options.alignment) {
 				case RIGHT:
 					return getDecoratedRight(getChildAt(index)) >= rightVisibleEdge();
 				case LEFT:
@@ -646,20 +662,24 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private boolean isEndOfLine(int index) {
-		if (flowLayoutOptions.itemsPerLine == 1) {
+		return isEndOfLine(index, flowLayoutOptions);
+	}
+
+	private boolean isEndOfLine(int index, FlowLayoutOptions options) {
+		if (options.itemsPerLine == 1) {
 			return true;
 		}
 		if (getChildCount() == 0 || index == getChildCount() - 1) {
 			return true;
 		}
-		return isStartOfLine(index + 1);
+		return isStartOfLine(index + 1, options);
 	}
 
-	private boolean shouldStartNewline(int x, int childWidth) {
-		if (flowLayoutOptions.itemsPerLine == 1) {
+	private boolean shouldStartNewline(int x, int childWidth, FlowLayoutOptions options) {
+		if (options.itemsPerLine == 1) {
 			return true;
 		}
-		switch (flowLayoutOptions.alignment) {
+		switch (options.alignment) {
 			case RIGHT:
 				return x - childWidth < leftVisibleEdge();
 			case LEFT:
