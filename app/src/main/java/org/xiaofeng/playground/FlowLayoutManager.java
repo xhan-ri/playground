@@ -715,9 +715,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private boolean isEndOfLine(int index, LayoutContext layoutContext) {
-		if (layoutContext.layoutOptions.itemsPerLine == 1) {
-			return true;
-		}
 		if (hasItemsPerLineLimit(layoutContext.layoutOptions) && layoutContext.currentLineItemCount == layoutContext.layoutOptions.itemsPerLine) {
 			return true;
 		}
@@ -728,10 +725,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	}
 
 	private boolean shouldStartNewline(int x, int childWidth, LayoutContext layoutContext) {
-		if (layoutContext.layoutOptions.itemsPerLine == 1) {
-			return true;
-		}
-
 		if (hasItemsPerLineLimit(layoutContext.layoutOptions) && layoutContext.currentLineItemCount == layoutContext.layoutOptions.itemsPerLine) {
 			return true;
 		}
