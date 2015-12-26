@@ -21,12 +21,12 @@ import java.util.Random;
 public class FlowLayoutActivity extends AppCompatActivity {
 
 	private RecyclerView recyclerView;
-	private static final int MIN_LEN = 3;
-	private static final int MAX_LEN = 10;
+	private static final int MIN_LEN = 2;
+	private static final int MAX_LEN = 8;
 	private static final int MAX_LINES = 1;
 	private static final int TEST_ITEM_SIZE = 400;
 	private static final Random random = new Random();
-	private static final String STRING_BASE = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+	private static final String STRING_BASE = "0123456789";
 	private static final int STRING_BASE_LEN = STRING_BASE.length();
 
 	class FlowItemViewHolder extends RecyclerView.ViewHolder {
@@ -202,6 +202,10 @@ public class FlowLayoutActivity extends AppCompatActivity {
 			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
 		} else if (id == R.id.clear) {
 			((FlowLayoutAdapter)recyclerView.getAdapter()).clear();
+		} else if (id == R.id.three_item_per_line) {
+			FlowLayoutManager flowLayoutManager = (FlowLayoutManager)recyclerView.getLayoutManager();
+			flowLayoutManager.maxItemsPerLine(3);
+			recyclerView.getAdapter().notifyItemRangeChanged(0, recyclerView.getAdapter().getItemCount());
 		}
 		return super.onOptionsItemSelected(item);
 	}
