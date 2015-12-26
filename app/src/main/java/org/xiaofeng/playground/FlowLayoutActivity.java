@@ -22,7 +22,7 @@ public class FlowLayoutActivity extends AppCompatActivity {
 
 	private RecyclerView recyclerView;
 	private static final int MIN_LEN = 2;
-	private static final int MAX_LEN = 8;
+	private static final int MAX_LEN = 10;
 	private static final int MAX_LINES = 1;
 	private static final int TEST_ITEM_SIZE = 400;
 	private static final Random random = new Random();

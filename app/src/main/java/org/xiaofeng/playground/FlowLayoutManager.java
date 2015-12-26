@@ -345,7 +345,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 	 */
 	private void addNewLineAtBottom(RecyclerView.Recycler recycler, RecyclerView.State state) {
 		int x = layoutStartPoint().x, y = getDecoratedBottom(getChildAt(getMaxHeightIndexInLine(getChildCount() - 1)));
-		int right = x, bottom = y;
 		int childAdapterPosition = getChildAdapterPosition(getChildCount() - 1) + 1;
 		// no item to add
 		if (childAdapterPosition == getItemCount()) {
@@ -697,9 +696,6 @@ public class FlowLayoutManager extends RecyclerView.LayoutManager {
 		if (index == 0) {
 			return true;
 		} else {
-			if (layoutContext.layoutOptions.itemsPerLine == 1) {
-				return true;
-			}
 			switch (layoutContext.layoutOptions.alignment) {
 				case RIGHT:
 					return getDecoratedRight(getChildAt(index)) >= rightVisibleEdge();
