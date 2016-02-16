@@ -51,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, ImageActivity.class));
 			}
 		});
+
+		findViewById(R.id.rotate_move_animation).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, RotateMoveActivity.class));
+			}
+		});
 	}
 
 	@Override

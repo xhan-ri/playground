@@ -15,4 +15,6 @@
     <string name="navigation_drawer_close">Close</string>
     <string name="title_activity_flow_layout">Flow layout</string>
     <string name="title_activity_image"></string>
+    <string name="button_rotate_move_animation"><![CDATA[Rotate & Move Animation]]></string>
+    <string name="title_activity_rotate_move">RotateMoveActivity</string>
 </resources>
