@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,22 +8,22 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.xiaofeng.playground.RotateMoveActivity"
-    tools:showIn="@layout/activity_rotate_move">
+    tools:context="org.xiaofeng.playground.AnimationEndActivity">
     <ImageView
-        android:id="@+id/target_image"
+        android:id="@+id/content_image"
         android:transitionName="animated_image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
         android:scaleType="centerInside"
         android:src="@drawable/photo_small"/>
     <ImageView
-        android:id="@+id/target_image2"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_below="@id/target_image"
+        android:id="@+id/content_image2"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@id/content_image"
         android:transitionName="animated_image2"
         android:src="@drawable/photo2_small"
-        android:rotation="-45"/>
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:rotation="45"/>
 </RelativeLayout>
