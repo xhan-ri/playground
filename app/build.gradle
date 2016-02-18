@@ -44,4 +44,5 @@ dependencies {
     compile(group: 'com.android.support', name: 'recyclerview-v7', version: supportLibVersion)
     compile(group: 'com.android.support', name: 'cardview-v7', version: supportLibVersion)
     compile 'com.wefika:flowlayout:0.4.0'
+    compile 'com.google.code.gson:gson:2.6.1'
 }

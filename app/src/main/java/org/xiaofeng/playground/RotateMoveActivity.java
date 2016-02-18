@@ -11,11 +11,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
+import android.view.Window;
 
 public class RotateMoveActivity extends AppCompatActivity {
 	private static final String LOG_TAG = "RotateMoveActivity";
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		getWindow().requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS);
+		getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+		getWindow().setSharedElementExitTransition(new MoveRotateTransition("animated_image", "animated_image2"));
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_rotate_move);
 		Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -31,6 +35,7 @@ public class RotateMoveActivity extends AppCompatActivity {
 
 				Bundle optionBundle = options.toBundle();
 				printBundle(optionBundle);
+
 				startActivity(new Intent(RotateMoveActivity.this, AnimationEndActivity.class), optionBundle);
 			}
 		});
