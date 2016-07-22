@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="org.xiaofeng.playground.ConstraintLayoutActivity"
+    tools:showIn="@layout/activity_constraint_layout"
+    tools:layout_editor_absoluteX="0dp"
+    tools:layout_editor_absoluteY="81dp">
+    <Button
+        android:layout_width="192dp"
+        android:layout_height="wrap_content"
+        android:text="Test button"
+        tools:layout_editor_absoluteX="63dp"
+        tools:layout_editor_absoluteY="447dp"
+        app:layout_constraintLeft_toLeftOf="@+id/content_constraint_layout"
+        tools:layout_constraintLeft_creator="0"
+        app:layout_constraintRight_toRightOf="@+id/content_constraint_layout"
+        tools:layout_constraintRight_creator="0"
+        app:layout_constraintBottom_toTopOf="@+id/textView2"
+        android:layout_marginBottom="8dp"
+        tools:layout_constraintBottom_creator="0"
+        app:layout_constraintHorizontal_bias="0.33"/>
+    <TextView
+        android:layout_width="384dp"
+        android:layout_height="wrap_content"
+        android:text="Test"
+        tools:layout_editor_absoluteX="-32dp"
+        tools:layout_editor_absoluteY="503dp"
+        android:id="@+id/textView2"
+        app:layout_constraintLeft_toLeftOf="@+id/content_constraint_layout"
+        android:layout_marginStart="32dp"
+        tools:layout_constraintLeft_creator="0"
+        app:layout_constraintRight_toRightOf="@+id/content_constraint_layout"
+        android:layout_marginEnd="32dp"
+        tools:layout_constraintRight_creator="0"
+        app:layout_constraintBottom_toBottomOf="@+id/content_constraint_layout"
+        android:layout_marginBottom="48dp"
+        tools:layout_constraintBottom_creator="0"
+        app:layout_constraintHorizontal_bias="1.0"/>
+</android.support.constraint.ConstraintLayout>

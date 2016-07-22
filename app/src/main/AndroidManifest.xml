@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="org.xiaofeng.playground"
-          xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="org.xiaofeng.playground">
+
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:allowBackup="true"
@@ -77,6 +79,20 @@
                 android:value="org.xiaofeng.playground.MainActivity"/>
         </activity>
         <activity android:name=".AnimationEndActivity">
+        </activity>
+        <activity
+            android:name=".ImageCaptureAndCropActivity"
+            android:label="@string/title_activity_image_capture_and_crop"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.xiaofeng.playground.MainActivity"/>
+        </activity>
+        <activity
+            android:name=".ConstraintLayoutActivity"
+            android:label="@string/title_activity_constraint_layout"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
     </application>
 

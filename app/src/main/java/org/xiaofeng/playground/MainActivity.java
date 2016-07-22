@@ -58,6 +58,20 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, RotateMoveActivity.class));
 			}
 		});
+
+		findViewById(R.id.image_capture_crop).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, ImageCaptureAndCropActivity.class));
+			}
+		});
+
+		findViewById(R.id.constraint_layout).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, ConstraintLayoutActivity.class));
+			}
+		});
 	}
 
 	@Override

@@ -48,4 +48,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/button_rotate_move_animation"/>
+    <Button
+        android:id="@+id/image_capture_crop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Start image capture and crop"/>
+    <Button
+        android:id="@+id/constraint_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Constraint Layout"/>
 </LinearLayout>

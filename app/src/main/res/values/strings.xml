@@ -17,4 +17,6 @@
     <string name="title_activity_image"></string>
     <string name="button_rotate_move_animation"><![CDATA[Rotate & Move Animation]]></string>
     <string name="title_activity_rotate_move">RotateMoveActivity</string>
+    <string name="title_activity_image_capture_and_crop">ImageCaptureAndCropActivity</string>
+    <string name="title_activity_constraint_layout">ConstraintLayoutActivity</string>
 </resources>
