@@ -13,7 +13,7 @@ android {
     }
     defaultConfig {
         applicationId "org.xiaofeng.playground"
-        minSdkVersion 23
+        minSdkVersion 19
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -44,6 +44,6 @@ dependencies {
     compile(group: 'com.android.support', name: 'cardview-v7', version: supportLibVersion)
     compile 'com.wefika:flowlayout:0.4.0'
     compile 'com.google.code.gson:gson:2.6.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha3'
     testCompile 'junit:junit:4.12'
 }

@@ -94,6 +94,8 @@
             android:label="@string/title_activity_constraint_layout"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         </activity>
+        <activity android:name=".AnimatedGradientActivity" android:theme="@style/Theme.AppCompat.Translucent">
+        </activity>
     </application>
 
 </manifest>
