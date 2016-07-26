@@ -63,4 +63,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Animated Gradient"/>
+
+    <Button
+        android:id="@+id/animated_gradient_background"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Animated Gradient Background"/>
 </LinearLayout>

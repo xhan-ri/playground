@@ -79,6 +79,13 @@ public class MainActivity extends AppCompatActivity {
 				startActivity(new Intent(MainActivity.this, AnimatedGradientActivity.class));
 			}
 		});
+
+		findViewById(R.id.animated_gradient_background).setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startActivity(new Intent(MainActivity.this, AnimatedGradientBackgroundActivity.class));
+			}
+		});
 	}
 
 	@Override
